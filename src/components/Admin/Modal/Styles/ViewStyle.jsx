@@ -15,8 +15,11 @@ export default function ViewStyle({ isOpen, onClose, style,BASE_URL}) {
       aria-labelledby="view-service-title"
       onClick={handleBackdropClick}
     >
-      <div className="relative w-full max-w-lg bg-gradient-to-b from-neutral-800 to-neutral-950 text-yellow-100 rounded-3xl shadow-2xl p-8 md:p-10 animate-fade-in">
-        {/* Close Button */}
+        {/* Enables Scrolling when content too much on y-axis  */}
+        <div
+          className="relative w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto custom-scroll bg-gradient-to-b from-neutral-800 to-neutral-950 text-yellow-100 rounded-3xl shadow-2xl p-8 md:p-10 animate-fade-in"
+        > 
+          {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-yellow-300 hover:text-yellow-500 transition focus:outline-none focus:ring-2 focus:ring-yellow-500 rounded"

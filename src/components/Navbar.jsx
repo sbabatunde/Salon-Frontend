@@ -54,12 +54,13 @@ export default function Navbar() {
               >
                 Contact Us
               </a>
-              <a
-                href="#booking"
-                className="py-2 px-4 rounded-md bg-gradient-to-r from-yellow-500 to-red-800 text-white font-semibold shadow hover:from-yellow-600 hover:to-red-900 transition"
-              >
-                Book Appointment
-              </a>
+              <RouterLink
+                      to="/booking"
+                      className="py-3 px-4 rounded-md bg-gradient-to-r from-yellow-500 to-red-800 text-white font-semibold shadow hover:from-yellow-600 hover:to-red-900 transition text-center"
+
+                >
+                  Book Appointment
+                </RouterLink>
               <a
                 href="/admin"
                 className="py-2 px-4 rounded-md bg-gradient-to-r from-yellow-500 to-red-800 text-white font-semibold shadow hover:from-yellow-600 hover:to-red-900 transition"
@@ -117,12 +118,13 @@ export default function Navbar() {
                 >
                   Contact Us
                 </a>
-                <a
-                  href="#booking"
-                  className="py-3 px-4 rounded-md bg-gradient-to-r from-yellow-500 to-red-800 text-white font-semibold shadow hover:from-yellow-600 hover:to-red-900 transition text-center"
+                <RouterLink
+                      to="/booking"
+                      className="py-3 px-4 rounded-md bg-gradient-to-r from-yellow-500 to-red-800 text-white font-semibold shadow hover:from-yellow-600 hover:to-red-900 transition text-center"
+
                 >
                   Book Appointment
-                </a>
+                </RouterLink>
               </div>
             </div>
           )}

@@ -16,7 +16,9 @@ export default function ViewBlog({ isOpen, onClose, blog, BASE_URL }) {
       aria-labelledby="view-blog-title"
       onClick={handleBackdropClick}
     >
-      <div className="relative w-full max-w-lg bg-gradient-to-b from-neutral-800 to-neutral-950 text-yellow-100 rounded-3xl shadow-2xl p-8 md:p-10 animate-fade-in">
+        <div
+          className="relative w-full max-w-xl max-h-[calc(100vh-4rem)] overflow-y-auto custom-scroll bg-gradient-to-b from-neutral-800 to-neutral-950 text-yellow-100 rounded-3xl shadow-2xl p-8 md:p-10 animate-fade-in"
+        > 
         {/* Close Button */}
         <button
           onClick={onClose}

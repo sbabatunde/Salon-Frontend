@@ -3,20 +3,22 @@ import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import apiClient from "../api/axios.js";
 
-export default function BlogPost({ BASE_URL }) {
+export default function BlogPost() {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+  
   useEffect(() => {
     const fetchSinglePost = async () => {
       try {
         setLoading(true);
         // const response = await fetch(`${BASE_URL}/blogs/view/${postId}`);
-        const response = await apiClient.get('/blogs/view/'`${postId}`);
-console.log(response); 
-        if (!response.ok) throw new Error("Blog post not found");
-        const data = await response.json();
+        const response = await apiClient.get(`/blogs/view/${postId}`);
+        // if (!response.ok) throw new Error("Blog post not found");
+        const data = response.data;
+
         setPost(data.data); // adjust based on your API response structure
       } catch (err) {
         setError(err.message);
@@ -27,6 +29,7 @@ console.log(response);
 
     fetchSinglePost();
   }, [postId, BASE_URL]);
+  console.log(BASE_URL); 
 
   useEffect(() => {
     window.scrollTo(0, 0);

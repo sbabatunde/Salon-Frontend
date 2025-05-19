@@ -21,7 +21,9 @@ export default function ViewServiceModal({ isOpen, onClose, service }) {
       aria-labelledby="view-service-title"
       onClick={handleBackdropClick}
     >
-      <div className="relative w-full max-w-md bg-gradient-to-b from-neutral-800 to-neutral-950 text-yellow-100 rounded-3xl shadow-2xl p-8 animate-fade-in">
+        <div
+          className="relative w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto custom-scroll bg-gradient-to-b from-neutral-800 to-neutral-950 text-yellow-100 rounded-3xl shadow-2xl p-8 md:p-10 animate-fade-in"
+        >
         {/* Close Button */}
         <button
           onClick={onClose}

@@ -99,7 +99,7 @@ export default function AddStyle({ isOpen, onClose, onStyleAdded,onSubmit }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-2" onClick={handleBackdropClick}>
 
       <div
-       className="bg-neutral-900 border border-yellow-700 rounded-2xl shadow-2xl w-[95%] sm:w-[90%] md:w-[80%] lg:w-[70%] xl:max-w-2xl p-6 sm:p-8 relative animate-fade-in overflow-y-auto max-h-[90vh]"
+        className="bg-neutral-900 border border-yellow-700 rounded-2xl shadow-2xl w-full max-w-2xl p-8 relative animate-fade-in overflow-y-auto max-h-[90vh]"
        role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"

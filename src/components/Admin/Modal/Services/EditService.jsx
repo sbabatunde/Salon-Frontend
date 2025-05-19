@@ -119,13 +119,16 @@ export default function EditService({ isOpen, onClose, service, onServiceUpdated
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+    onClick={handleBackdropClick}
+    >
+  
       <div
-        className="bg-neutral-900 border border-yellow-700 rounded-2xl shadow-2xl w-full max-w-2xl p-8 relative animate-fade-in overflow-y-auto max-h-[90vh]"
+        className="relative w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto custom-scroll bg-gradient-to-b from-neutral-800 to-neutral-950 text-yellow-100 rounded-3xl shadow-2xl p-8 md:p-10 animate-fade-in"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        onClick={handleBackdropClick}
+        // onClick={handleBackdropClick}
       >
         <button
           onClick={onClose}

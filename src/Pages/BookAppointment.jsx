@@ -1,31 +1,46 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CalendarCheck, User, Phone, Mail, Scissors, Loader2 } from "lucide-react";
 import apiClient from "../../src/api/axios.js"; // Update the path to your apiClient
 
-const services = [
-  "Bridal Hair Styling",
-  "Hair Coloring",
-  "Hair Extensions",
-  "Cuts & Styling",
-  "Treatments",
-];
-
 export default function BookAppointment() {
+    const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const [services, setServices] = useState([]);
+    const navigate = useNavigate();
+    const params = new URLSearchParams(location.search);
+    const selectedStyle = params.get("style"); // could be null if not passed
+    //Get Services 
+    useEffect(() => {
+      const fetchServicesOffered = async () => {
+        try {
+          const response = await apiClient.get("/services/list");
+          const data = response.data?.data || [];
+          setServices(data);
+          // console.log(data);
+          
+        } catch (err) {
+          setError(err.response?.data?.message || "Failed to fetch suppliers.");
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchServicesOffered();
+    }, []);
+
   const [form, setForm] = useState({
     name: "",
     phone: "",
     email: "",
-    service: services[0],
+    service:   services[0],
     date: "",
     time: "",
-    notes: "",
+    notes: selectedStyle ? `I want to book the style - ${selectedStyle}` : "",
   });
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const navigate = useNavigate();
+  
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -74,7 +89,7 @@ export default function BookAppointment() {
           <div className="flex justify-center items-center gap-2 mb-3">
             <CalendarCheck className="w-7 h-7 text-yellow-400" />
             <span className="uppercase tracking-widest text-yellow-300 font-semibold text-sm">
-              Book an Appointment
+              Book an Appointment {selectedStyle && `for ${selectedStyle}`}
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
@@ -155,9 +170,9 @@ export default function BookAppointment() {
                   onChange={handleChange}
                   className="py-2 w-full rounded bg-neutral-800 border border-yellow-700 text-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 >
-                  {services.map((service, idx) => (
-                    <option key={idx} value={service}>
-                      {service}
+                  {services.map((service) => (
+                    <option key={service.id} value={service.id}>
+                      {service.title}
                     </option>
                   ))}
                 </select>

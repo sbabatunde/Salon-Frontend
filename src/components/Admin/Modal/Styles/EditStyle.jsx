@@ -104,7 +104,9 @@ export default function EditStyleModal({ isOpen, onClose, style, onStyleUpdated,
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-2"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-neutral-900 border border-yellow-700 rounded-2xl shadow-2xl w-[95%] sm:w-[90%] md:w-[80%] lg:w-[70%] xl:max-w-2xl p-6 sm:p-8 relative animate-fade-in overflow-y-auto max-h-[90vh]">
+      <div 
+          className="relative w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-y-auto custom-scroll bg-gradient-to-b from-neutral-800 to-neutral-950 text-yellow-100 rounded-3xl shadow-2xl p-8 md:p-10 animate-fade-in"
+      >
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-yellow-200 hover:text-yellow-400 transition"

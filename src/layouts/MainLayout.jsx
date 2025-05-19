@@ -12,13 +12,11 @@ const MainLayout = () => {
           const response = await apiClient.get("/settings/business/details/fetch");
           const data = response.data?.data || [];
           setBusinessInfo(data);
-          console.log(data);
-          
           
         } catch (err) {
           console.log(err.response?.data?.message || "Failed to fetch buisness details");
         } finally {
-          console.log(false);
+          // console.log(false);
         }
       };
   
