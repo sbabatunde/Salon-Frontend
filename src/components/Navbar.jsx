@@ -125,6 +125,12 @@ export default function Navbar() {
                 >
                   Book Appointment
                 </RouterLink>
+                <a
+                href="/admin"
+                className="py-2 px-4 rounded-md bg-gradient-to-r from-yellow-500 to-red-800 text-white font-semibold shadow hover:from-yellow-600 hover:to-red-900 transition"
+              >
+                Admin
+              </a>
               </div>
             </div>
           )}
