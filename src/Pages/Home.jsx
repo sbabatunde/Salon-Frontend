@@ -23,6 +23,9 @@ export default function HomePage () {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const location = useLocation();
+  const [activeVideos, setActiveVideos] = useState([]);
+  const [activeLooks, setActiveLooks] = useState([]);
+  const [testimonials, setTestimonaials] = useState([]);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   useEffect(() => {
@@ -73,11 +76,11 @@ export default function HomePage () {
     fetchServicesOffered();
   }, []);
 
-  //Get Services 
+  //Get Blog 
   useEffect(() => {
     const fetchBlogPost = async () => {
       try {
-        const response = await apiClient.get("/blogs/show");
+        const response = await apiClient.get("/blogs/show/active");
         const data = response.data?.data || [];
         setBlogs(data);
         // console.log(data);
@@ -92,14 +95,59 @@ export default function HomePage () {
     fetchBlogPost();
   }, []);
 
+  //Get Active Site Videos
+  useEffect(() => {
+    const fetchActiveVideos = async () => {
+      try {
+        const response = await apiClient.get("/videos/active"); // replace with your real endpoint
+        const data = response?.data || [];
+        setActiveVideos(data);
+        console.log(data); 
+      } catch (err) {
+        console.error("Failed to fetch active videos", err);
+      }
+    };
+
+    fetchActiveVideos();
+  }, []);
+
+  //Get Active Porfolio Images
+  useEffect(() => {
+    const fetchActiveLooks = async () => {
+      try {
+        const response = await apiClient.get("/portfolio/show"); // replace with your real endpoint
+        const data = response?.data || [];
+        setActiveLooks(data);
+      } catch (err) {
+        console.error("Failed to fetch active videos", err);
+      }
+    };
+
+    fetchActiveLooks();
+  }, []);
+
+//Get Testimonials
+useEffect(() => {
+  const fetchClientTesimonials = async () => {
+    try {
+      const response = await apiClient.get("/testimonials"); // replace with your real endpoint
+      const data = response?.data || [];
+      setTestimonaials(data);
+    } catch (err) {
+      console.error("Failed to fetch active videos", err);
+    }
+  };
+
+  fetchClientTesimonials();
+}, []);
 
   return (
     <>
         {/* <div className="max-w-7xl mx-auto pt-20 px-6"> */}
-        <Hero />
+        <Hero videos={activeVideos}  BASE_URL={BASE_URL} />
         <Services  services = {services} />
-        <Portfolio  />
-        <Testimonials />
+        <Portfolio  images={activeLooks}  BASE_URL={BASE_URL} />
+        <Testimonials  testimonials={testimonials}  BASE_URL={BASE_URL} />
         <About />
         <Team />
         <Booking />

@@ -1,62 +1,61 @@
 import { useState, useEffect } from "react";
-import { X, FileText, Tags, ImagePlus } from "lucide-react";
+import { X, UploadCloud, FileText, Link2, Video, Info } from "lucide-react";
 import { toast } from "react-toastify";
 import apiClient from "../../../../api/axios";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 
-export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null, BASE_URL }) {
-  const isEdit = Boolean(blog);
+export default function HeroVideoAddEdit({ isOpen, onClose, onVideoSaved, video = null, BASE_URL }) {
+  const isEdit = Boolean(video);
 
   const [form, setForm] = useState({
     title: "",
-    content: "",
-    tag: "",
-    // status: "active",
-    image: null,
+    description: "",
+    status: "active",
+    videoFile: null,
+    videoUrl: "",
   });
 
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isEdit && blog) {
+    if (isEdit && video) {
       setForm({
-        title: blog.title || "",
-        content: blog.content || "",
-        tag: blog.tag || "",
-        // status: blog.status || "active",
-        image: null,
+        title: video.title || "",
+        description: video.description || "",
+        status: video.status || "active",
+        videoFile: null,
+        videoUrl: video.video_url || "",
       });
-      setPreview(blog.image ? `${BASE_URL}${blog.image}` : "");
+      setPreview(video.video_path ? `${BASE_URL}/storage/${video.video_path}` : "");
     } else {
       setForm({
         title: "",
-        content: "",
-        tag: "",
-        // status: "active",
-        image: null,
+        description: "",
+        status: "active",
+        videoFile: null,
+        videoUrl: "",
       });
       setPreview("");
     }
-  }, [blog, isEdit, isOpen]);
+  }, [video, isEdit, isOpen]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "image") {
+    if (name === "videoFile") {
       const file = files[0];
-      setForm((prev) => ({ ...prev, image: file }));
+      setForm((prev) => ({ ...prev, videoFile: file }));
       setPreview(file ? URL.createObjectURL(file) : "");
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
+      if (name === "videoUrl") setPreview("");
     }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
-      setForm((prev) => ({ ...prev, image: file }));
+    if (file && file.type.startsWith("video/")) {
+      setForm((prev) => ({ ...prev, videoFile: file }));
       setPreview(URL.createObjectURL(file));
     }
   };
@@ -64,39 +63,36 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title.trim()) return toast.error("Title is required");
-    if (!form.content.trim()) return toast.error("Content is required");
-    if (!form.tag.trim()) return toast.error("Tag is required");
-  
+    if (!form.videoFile && !form.videoUrl && !video?.video_path && !video?.video_url)
+      return toast.error("Please upload a video file or provide a video URL");
+
     setLoading(true);
     try {
       const formData = new FormData();
       formData.append("title", form.title);
-      formData.append("content", form.content);
-      formData.append("tag", form.tag);
-      // formData.append("status", form.status);
-      if (form.image) formData.append("image", form.image);
-      if (isEdit && blog?.id) formData.append("id", blog.id);
-  
-      const route = isEdit ? `/blogs/update/${blog.id}?_method=PUT` : "/blogs/create";
-  
-      await apiClient.post(route, formData, {
+      formData.append("description", form.description);
+      formData.append("status", form.status);
+      if (form.videoFile) formData.append("video", form.videoFile);
+      if (form.videoUrl) formData.append("url", form.videoUrl);
+      if (video?.id) formData.append("id", video.id);
+
+      await apiClient.post("/videos/store", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
-      toast.success(`Blog ${isEdit ? "updated" : "added"} successfully!`);
-      onBlogSaved?.();
+
+      toast.success(`Hero video ${isEdit ? "updated" : "added"} successfully!`);
+      onVideoSaved?.();
       onClose();
     } catch (err) {
       const message =
         err.response?.data?.message ||
         Object.values(err.response?.data?.errors || {})?.[0]?.[0] ||
-        `Failed to ${isEdit ? "update" : "save"} blog.`;
+        `Failed to ${isEdit ? "update" : "save"} video.`;
       toast.error(message);
     } finally {
       setLoading(false);
     }
   };
-  
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
@@ -118,7 +114,7 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
           <X className="w-7 h-7" />
         </button>
         <h2 className="text-2xl font-extrabold text-center mb-6 tracking-wide">
-          {isEdit ? "Edit Blog" : "Add Blog"}
+          {isEdit ? "Edit Hero Video" : "Upload Hero Video"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Title */}
@@ -131,73 +127,86 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
                 value={form.title}
                 onChange={handleChange}
                 placeholder="Enter title..."
+                required
                 className="pl-10 py-2 w-full rounded bg-neutral-800 border border-yellow-700 placeholder-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               />
             </div>
           </div>
-
-          {/* Content with React Quill */}
+          {/* Description */}
           <div>
-            <label className="font-semibold">Content</label>
-            <ReactQuill
-              theme="snow"
-              value={form.content}
-              onChange={(content) => setForm((prev) => ({ ...prev, content }))}
-              className="quill-editor bg-neutral-800 text-yellow-200 border-yellow-600 rounded"
-            />
-          </div>
-
-          {/* Tag */}
-          <div>
-            <label className="block font-semibold text-yellow-500 mb-2" htmlFor="tag">
-              Tag
-            </label>
-            <div className="relative">
-              <Tags className="absolute left-3 top-3 w-5 h-5 text-yellow-400" />
-              <input
-                name="tag"
-                value={form.tag}
+            <label className="font-semibold">Description</label>
+            <div className="relative mt-1">
+              <Info className="absolute left-3 top-3 w-5 h-5 text-yellow-400" />
+              <textarea
+                name="description"
+                value={form.description}
                 onChange={handleChange}
-                placeholder="e.g. Tech, Tips"
-                className="pl-10 py-2 w-full rounded bg-neutral-800 border border-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                placeholder="Enter description..."
+                rows={3}
+                className="pl-10 py-2 w-full rounded bg-neutral-800 border border-yellow-700 placeholder-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               />
             </div>
           </div>
-
-          {/* Image Upload */}
+          {/* Status */}
+          {/* <div>
+            <label className="font-semibold">Status</label>
+            <select
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              className="w-full py-2 rounded bg-neutral-800 border border-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div> */}
+          {/* File upload */}
           <div>
-            <label className="font-semibold">Blog Image</label>
+            <label className="font-semibold">Video File</label>
             <div
               className="relative flex items-center justify-center border-2 border-dashed border-yellow-600 rounded-lg p-4 bg-neutral-800 hover:border-yellow-400 transition"
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
             >
-              <ImagePlus className="w-6 h-6 text-yellow-500 mr-2" />
-              <label htmlFor="image" className="cursor-pointer text-yellow-400 hover:underline">
+              <UploadCloud className="w-6 h-6 text-yellow-500 mr-2" />
+              <label htmlFor="videoFile" className="cursor-pointer text-yellow-400 hover:underline">
                 Click or drag to upload
                 <input
-                  id="image"
-                  name="image"
+                  id="videoFile"
+                  name="videoFile"
                   type="file"
-                  accept="image/*"
+                  accept="video/*"
                   onChange={handleChange}
                   className="hidden"
                 />
               </label>
             </div>
             {preview && (
-              <div className="pt-3 flex justify-center">
-                <img
+              <div className="py-2 flex justify-center">
+                <video
                   src={preview}
-                  alt="Blog preview"
-                  className="max-h-56 rounded shadow border border-yellow-500"
+                  controls
+                  className="max-h-48 rounded shadow border border-yellow-500"
                 />
               </div>
             )}
           </div>
-
+          {/* Or URL */}
+          <div>
+            <label className="font-semibold">Or Video URL</label>
+            <div className="relative mt-1">
+              <Link2 className="absolute left-3 top-3 w-5 h-5 text-yellow-400" />
+              <input
+                name="videoUrl"
+                value={form.videoUrl}
+                onChange={handleChange}
+                placeholder="https://youtube.com/..."
+                className="pl-10 py-2 w-full rounded bg-neutral-800 border border-yellow-700 placeholder-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              />
+            </div>
+          </div>
           {/* Buttons */}
-          <div className="flex justify-end gap-4 pt-4">
+          <div className="flex justify-end gap-4 pt-3 mt-4">
             <button
               type="button"
               onClick={onClose}
@@ -211,12 +220,11 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
               className="px-6 py-2 rounded-lg bg-gradient-to-r from-yellow-500 to-red-800 text-white font-bold flex items-center gap-2 hover:from-yellow-600 hover:to-red-900 transition"
               disabled={loading}
             >
+              <Video className="w-5 h-5" />
               {loading ? (isEdit ? "Updating..." : "Saving...") : isEdit ? "Update" : "Save"}
             </button>
           </div>
         </form>
-
-        {/* Fade-in Animation */}
         <style>{`
           .animate-fade-in {
             animation: fadeInModal 0.25s ease-out;
@@ -224,27 +232,6 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
           @keyframes fadeInModal {
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
-          }
-
-          /* Custom Quill Theme */
-          .quill-editor .ql-toolbar,
-          .quill-editor .ql-container {
-            background-color: #1f2937 !important;
-            border-color: #ca8a04 !important;
-            color: #facc15;
-          }
-
-          .quill-editor .ql-editor {
-            color: #fefcbf;
-            min-height: 150px;
-          }
-
-          .quill-editor .ql-toolbar button svg {
-            color: #facc15;
-          }
-
-          .quill-editor .ql-toolbar button:hover svg {
-            color: #fde68a;
           }
         `}</style>
       </div>

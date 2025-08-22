@@ -1,95 +1,95 @@
 import { useState, useEffect } from "react";
 import { Pencil, Trash, Eye, Plus } from "lucide-react";
-import BlogAddEditModal from "./Modal/Blog/AddEditBlog.jsx";
-import DeleteBlog from "./Modal/Blog/DeleteBlog.jsx";
-import ViewBlog from "./Modal/Blog/ViewBlog.jsx";
+import SignatureLookAddEditModal from "./Modal/SignatureLook/AddEdit.jsx";
+import DeleteSignatureLook from "./Modal/SignatureLook/Delete.jsx";
+import ViewSignatureLook from "./Modal/SignatureLook/View.jsx";
 import apiClient from "../../api/axios.js";
 import { toast } from "react-toastify";
 
-export default function Blogs() {
-  const [blogs, setBlogs] = useState([]);
+export default function SignatureLooks() {
+  const [pictures, setPictures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalType, setModalType] = useState(null);
-  const [selectedBlog, setSelectedBlog] = useState(null);
+  const [selectedPic, setSelectedPic] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
 
   const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
-  const fetchBlogs = async () => {
+  const fetchSignatureLooks = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get("/blogs/show/all");
-      setBlogs(res.data.data || []);
+      const res = await apiClient.get("/portfolio/all");
+
+      setPictures(res.data || []);
     } catch (err) {
-      toast.error("Error fetching blogs");
+      toast.error("Error fetching hero videos");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchBlogs();
+    fetchSignatureLooks();
   }, []);
 
-  const filteredBlogs = blogs.filter((b) =>
-    b.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredLooks = pictures.filter((p) =>
+    p.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAdd = () => {
-    setSelectedBlog(null);
+    setSelectedPic(null);
     setModalType("add");
     setModalOpen(true);
   };
 
-  const handleView = (blog) => {
-    setSelectedBlog(blog);
+  const handleView = (picture) => {
+    setSelectedPic(picture);
     setModalType("view");
     setModalOpen(true);
   };
 
-  const handleEdit = (blog) => {
-    setSelectedBlog(blog);
+  const handleEdit = (picture) => {
+    setSelectedPic(picture);
     setModalType("edit");
     setModalOpen(true);
   };
 
-  const handleDelete = (blog) => {
-    setSelectedBlog(blog);
+  const handleDelete = (picture) => {
+    setSelectedPic(picture);
     setModalType("delete");
     setModalOpen(true);
   };
 
-  const handleDeleteConfirmed = async (blog) => {
+  const handleDeleteConfirmed = async (picture) => {
     try {
-      await apiClient.delete(`/blogs/delete/${blog.id}`);
-      setBlogs(prev => prev.filter((b) => b.id !== blog.id));
-      toast.success("Blog deleted");
+      await apiClient.delete(`/portfolio/delete/${picture.id}`);
+      setPictures((prev) => prev.filter((p) => p.id !== picture.id));
+      toast.success("Image deleted");
     } catch (err) {
-      toast.error("Failed to delete blog");
+      toast.error("Failed to delete image");
     } finally {
       closeModal();
     }
   };
 
-  const handleBlogSaved = () => {
-    fetchBlogs();
+  const handleSignatureLookSaved = () => {
+    fetchSignatureLooks();
     closeModal();
   };
 
-  const handleToggleStatus = async (blog) => {
-    const newStatus = blog.status === "Active" ? "Inactive" : "Active";
+  const handleToggleStatus = async (picture) => {
+    const newStatus = picture.status === "active" ? "inactive" : "active";
+    console.log("Toggling status for picture:", picture.id, "to", newStatus);
 
     try {
-      const response = await apiClient.put(`/blogs/update/${blog.id}`, {
+      const response = await apiClient.patch(`/portfolio/status/${picture.id}/toggle`, {
         status: newStatus,
       });
-
+      console.log("Response from status toggle:", response.data);
       if (response.data.success) {
-        setBlogs(prev =>
-          prev.map(b =>
-            b.id === blog.id ? { ...b, status: newStatus } : b
-          )
+        setPictures((prev) =>
+          prev.map((p) => (p.id === picture.id ? { ...p, status: newStatus } : p))
         );
 
         toast.success("Status updated!");
@@ -111,26 +111,27 @@ export default function Blogs() {
 
   const closeModal = () => {
     setModalOpen(false);
-    setSelectedBlog(null);
+    setSelectedPic(null);
     setModalType(null);
   };
+
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-yellow-100">Blogs</h1>
+        <h1 className="text-3xl font-bold text-yellow-100">Signature Looks</h1>
         <button
           onClick={handleAdd}
           className="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded shadow"
         >
           <Plus className="w-5 h-5" />
-          New Blog
+          New Look
         </button>
       </div>
 
       <input
         type="search"
-        placeholder="Search blogs..."
+        placeholder="Search signature looks..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="mb-4 w-full max-w-md p-3 rounded bg-neutral-800 border border-yellow-700 text-yellow-100 placeholder-yellow-600"
@@ -140,7 +141,7 @@ export default function Blogs() {
         <table className="w-full min-w-[600px] text-left">
           <thead>
             <tr className="border-b border-yellow-800">
-              <th className="py-2 px-3">Image</th>
+              <th className="py-2 px-3">Image Preview</th>
               <th className="px-3">Title</th>
               <th className="px-3">Tag</th>
               <th className="px-3">Status</th>
@@ -148,32 +149,39 @@ export default function Blogs() {
             </tr>
           </thead>
           <tbody>
-            {filteredBlogs.map((b) => (
-              <tr key={b.id} className="border-b border-neutral-800 hover:bg-yellow-900/20">
-                <td className="px-3 py-2">
+            {filteredLooks.map((p) => (
+              <tr
+                key={p.id}
+                className="border-b border-neutral-800 hover:bg-yellow-900/20"
+              >
+              <td className="px-3 py-2">
                   <img
-                    src={`${BASE_URL}${b.image}`}
-                    alt={b.title}
+                    src={`${BASE_URL}/storage/${p.image}`}
+                    alt={p.title}
                     className="w-16 h-16 object-cover rounded-md border border-yellow-400 shadow"
                   />
                 </td>
-                <td className="px-3">{b.title}</td>
-                <td className="px-3">{b.tag}</td>
+                <td className="px-3">{p.title}</td>
+                <td className="px-3">{p.tag}</td>
                 <td className="px-3">
                   <button
-                    onClick={() => handleToggleStatus(b)}
+                    onClick={() => handleToggleStatus(p)}
                     className="relative inline-block w-[80px] h-[28px] overflow-hidden bg-gray-800 rounded-full text-xs uppercase font-semibold text-white cursor-pointer border border-yellow-600"
                   >
                     <span
                       className={`absolute top-0 text-white left-0 w-full h-full flex items-center justify-center transition-transform duration-300 ${
-                        b.status === "Active" ? "translate-x-0 bg-green-600" : "-translate-x-full"
+                        p.status === "active"
+                          ? "translate-x-0 bg-green-600"
+                          : "-translate-x-full"
                       }`}
                     >
                       Active
                     </span>
                     <span
                       className={`absolute top-0 text-white left-full w-full h-full flex items-center justify-center transition-transform duration-300 ${
-                        b.status === "Inactive" ? "-translate-x-full bg-red-600" : "translate-x-0"
+                        p.status === "inactive"
+                          ? "-translate-x-full bg-red-600"
+                          : "translate-x-0"
                       }`}
                     >
                       Inactive
@@ -181,47 +189,72 @@ export default function Blogs() {
                   </button>
                 </td>
                 <td className="px-3 py-4 flex justify-center items-center gap-3">
-                  <button onClick={() => handleView(b)} title="View" className="text-yellow-400 hover:text-yellow-300"><Eye size={18} /></button>
-                  <button onClick={() => handleEdit(b)} title="Edit" className="text-blue-500 hover:text-blue-400"><Pencil size={18} /></button>
-                  <button onClick={() => handleDelete(b)} title="Delete" className="text-red-500 hover:text-red-400"><Trash size={18} /></button>
+                  <button
+                    onClick={() => handleView(p)}
+                    title="View"
+                    className="text-yellow-400 hover:text-yellow-300"
+                  >
+                    <Eye size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleEdit(p)}
+                    title="Edit"
+                    className="text-blue-500 hover:text-blue-400"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p)}
+                    title="Delete"
+                    className="text-red-500 hover:text-red-400"
+                  >
+                    <Trash size={18} />
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        {loading && <div className="p-8 text-center animate-pulse text-yellow-200">Loading blogs...</div>}
-        {!loading && blogs.length === 0 && <div className="p-8 text-center text-yellow-400">No blogs found.</div>}
+        {loading && (
+          <div className="p-8 text-center animate-pulse text-yellow-200">
+            Loading signature looks...
+          </div>
+        )}
+        {!loading && pictures.length === 0 && (
+          <div className="p-8 text-center text-yellow-400">
+            No image found.
+          </div>
+        )}
       </div>
 
       {/* Conditionally render modals based on modalType */}
       {(modalType === "add" || modalType === "edit") && (
-        <BlogAddEditModal
-          key={modalType === "add" ? "new" : selectedBlog?.id || "modal"}
+        <SignatureLookAddEditModal
+          key={modalType === "add" ? "new" : selectedPic?.id || "modal"}
           isOpen={isModalOpen}
           onClose={closeModal}
-          blog={selectedBlog}
+          picture={selectedPic}
           BASE_URL={BASE_URL}
-          onBlogSaved={handleBlogSaved}
+          onSaved={handleSignatureLookSaved}
         />
       )}
 
-      {modalType === "view" && selectedBlog && (
-        <ViewBlog
+      {modalType === "view" && selectedPic && (
+        <ViewSignatureLook
           isOpen={isModalOpen}
           onClose={closeModal}
-          style={selectedBlog}
-          blog={selectedBlog}
+          picture={selectedPic}
           BASE_URL={BASE_URL}
         />
       )}
 
-      {modalType === "delete" && selectedBlog && (
-        <DeleteBlog
+      {modalType === "delete" && selectedPic && (
+        <DeleteSignatureLook
           isOpen={isModalOpen}
           onClose={closeModal}
-          blog={selectedBlog}
-          onConfirm={() => handleDeleteConfirmed(selectedBlog)}
+          onConfirm={() => handleDeleteConfirmed(selectedPic)}
+          picture={selectedPic}
         />
       )}
     </div>

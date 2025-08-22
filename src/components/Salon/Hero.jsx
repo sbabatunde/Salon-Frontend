@@ -1,39 +1,71 @@
 import { useState, useEffect } from "react";
 import { Scissors, Sparkles, CalendarCheck } from "lucide-react";
-import video1 from "../../assets/precious-hairmpire/video1.mp4";
-import video2 from "../../assets/precious-hairmpire/video2.mp4";
-import video3 from "../../assets/precious-hairmpire/video3.mp4";
-import video4 from "../../assets/precious-hairmpire/video4.mp4";
-import video5 from "../../assets/precious-hairmpire/video5.mp4";
-// import eprop from "../../assets/eprop.mp4";
-// import eprop2 from "../../assets/eprop2.mp4";
 
-const slides = [
-  { type: "video", src: video1 },
-  { type: "video", src: video2 },
-  { type: "video", src: video3 },
-  { type: "video", src: video4 },
-  { type: "video", src: video5 },
-];
+// Determine if a URL is an embeddable video platform
+function isEmbedUrl(url) {
+  return (
+    url.includes("youtube.com") ||
+    url.includes("youtu.be") ||
+    url.includes("facebook.com") ||
+    url.includes("tiktok.com") ||
+    url.includes("instagram.com")
+  );
+}
 
-function Hero() {
+  // Convert regular URLs into embed-ready iframe URLs
+  function getEmbedUrl(url) {
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      const videoId =
+        url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/)?.[1] || "";
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+    }
+
+    if (url.includes("facebook.com")) {
+      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
+        url
+      )}&autoplay=1&mute=1`;
+    }
+
+    if (url.includes("tiktok.com")) {
+      return url.replace("/video/", "/embed/"); // embed format
+    }
+
+    if (url.includes("instagram.com")) {
+      return `https://www.instagram.com/embed`; // Instagram embedding is tricky; see note below
+    }
+
+    return url;
+  }
+
+export default function Hero({ videos = [], BASE_URL }) {
   const [current, setCurrent] = useState(0);
 
-  // Auto-advance slider every 5 seconds
+  const slides = videos.map((video) => {
+    const src = video.video_url
+      ? video.video_url
+      : `${BASE_URL}/storage/${video.video_path.replace(/^\/+/, "")}`;
+    return {
+      type: isEmbedUrl(src) ? "embed" : "video",
+      src,
+    };
+  });
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, 10000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
   return (
-    <section id="home" className="relative h-[80vh] w-full flex items-center justify-center overflow-hidden">
-      {/* Background Slider */}
+    <section
+      id="home"
+      className="relative h-[80vh] w-full flex items-center justify-center overflow-hidden"
+    >
       {slides.map((slide, idx) => (
         <div
           key={idx}
-          className={`absolute inset-0 transition-opacity duration-1500 ${
+          className={`absolute inset-0 transition-opacity duration-[1500ms] ${
             idx === current ? "opacity-100 z-0" : "opacity-0"
           }`}
         >
@@ -47,13 +79,15 @@ function Hero() {
               className="object-cover w-full h-full"
             />
           ) : (
-            <img
-              src={slide.src}
-              alt=""
-              className="object-cover w-full h-full"
+            <iframe
+              src={getEmbedUrl(slide.src)}
+              frameBorder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full object-cover"
+              title={`Embedded Video ${idx + 1}`}
             />
           )}
-          {/* Overlay for darkening the background */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80"></div>
         </div>
       ))}
@@ -72,22 +106,19 @@ function Hero() {
             Beauty
           </span>{" "}
           with{" "}
-          <Scissors className="inline w-10 h-10 text-yellow-400 align-middle drop-shadow" />
-          {" "}
+          <Scissors className="inline w-10 h-10 text-yellow-400 align-middle drop-shadow" />{" "}
           <span className="bg-gradient-to-r from-yellow-500 to-red-800 text-transparent bg-clip-text">
             Precious Hairmpire
           </span>
         </h1>
         <p className="mt-4 mb-8 text-lg sm:text-xl text-center text-yellow-100 max-w-2xl drop-shadow">
-          Stunning styles for every occasion. Bridal, events, and everyday glam-crafted just for you.
+          Stunning styles for every occasion. Bridal, events, and everyday glam—crafted just for
+          you.
         </p>
         <div className="flex gap-4">
           <a
             href="/booking"
-            className="inline-flex items-center gap-2 px-8 py-3 rounded-full 
-              bg-gradient-to-r from-yellow-500 to-red-800 
-              hover:from-yellow-600 hover:to-red-900
-              text-white font-bold text-lg shadow-lg transition"
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-red-800 hover:from-yellow-600 hover:to-red-900 text-white font-bold text-lg shadow-lg transition"
           >
             <CalendarCheck className="w-5 h-5" />
             Book Now
@@ -102,14 +133,16 @@ function Hero() {
         </div>
       </div>
 
-      {/* Slider navigation dots */}
+      {/* Slider dots */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         {slides.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrent(idx)}
             className={`w-3 h-3 rounded-full transition-all ${
-              idx === current ? "bg-gradient-to-r from-yellow-500 to-red-800 scale-125" : "bg-white/30"
+              idx === current
+                ? "bg-gradient-to-r from-yellow-500 to-red-800 scale-125"
+                : "bg-white/30"
             }`}
             aria-label={`Go to slide ${idx + 1}`}
           />
@@ -119,4 +152,4 @@ function Hero() {
   );
 }
 
-export default Hero;
+

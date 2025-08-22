@@ -1,6 +1,6 @@
 // src/Pages/Admin/Settings.jsx
 import {X, Linkedin, Phone, Mail, Instagram, Facebook,MapPin, Loader2,Save,MapPinCheckIcon} from "lucide-react";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../../src/api/axios.js"; // Update the path to your apiClient
 
@@ -23,7 +23,29 @@ export default function Settings() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [recordId, setRecordId] = useState(null);
 
+
+  useEffect(() => {
+    const fetchExistingData = async () => {
+      try {
+        const response = await apiClient.get("/settings/business/details/fetch");
+        const data = response.data.data;
+        if (data) {
+          setForm({ ...data });
+          setIsUpdate(true); // mark as update mode
+          setRecordId(data.id); // assuming each setting record has a unique `id`
+        }
+      } catch (err) {
+        console.error("Error fetching business settings:", err);
+      }
+    };
+  
+    fetchExistingData();
+  }, []);
+  
+  
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -34,26 +56,45 @@ export default function Settings() {
     setError("");
     setSuccess("");
     setSubmitted(false);
-
+  
     try {
-      // Adjust the API endpoint as needed for your backend
-      const response = await apiClient.post("/settings/business/details/create", form);
+      const endpoint = isUpdate
+        ? `/settings/business/details/update/${recordId}` // update mode
+        : `/settings/business/details/create`; // create mode
+  
+      const method = isUpdate ? "put" : "post";
+  
+      const response = await apiClient[method](endpoint, form);
+  
       setSuccess(response.data.message);
       console.log(response);
       setSubmitted(true);
-      setForm({
-        businessName: "",
-        email: "",
-        phone: "",
-        address: "",
-        facebook: "",
-        instagram: "",
-        x: "",
-        linkedIn: "",
-      });
+  
+      // If newly created, switch to update mode
+      if (!isUpdate && response.data.data?.id) {
+        setIsUpdate(true);
+        setRecordId(response.data.data.id);
+      }
+  
+      // Optional: keep the form data if updating, or reset if creating
+      if (isUpdate) {
+        // keep form data
+      } else {
+        setForm({
+          businessName: "",
+          email: "",
+          phone: "",
+          address: "",
+          googleMapAddress: "",
+          facebook: "",
+          instagram: "",
+          x: "",
+          linkedIn: "",
+        });
+      }
+  
       setTimeout(() => {
         setSubmitted(false);
-        // navigate("/");
       }, 2500);
     } catch (err) {
       setError(
@@ -64,6 +105,7 @@ export default function Settings() {
       setLoading(false);
     }
   };
+  
 
 
 

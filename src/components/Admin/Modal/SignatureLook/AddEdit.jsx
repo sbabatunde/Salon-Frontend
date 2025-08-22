@@ -1,18 +1,14 @@
 import { useState, useEffect } from "react";
-import { X, FileText, Tags, ImagePlus } from "lucide-react";
+import { X, UploadCloud, FileText, Tag } from "lucide-react";
 import { toast } from "react-toastify";
 import apiClient from "../../../../api/axios";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 
-export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null, BASE_URL }) {
-  const isEdit = Boolean(blog);
+export default function SignatureLookAddEdit({ isOpen, onClose, onSaved, picture = null, BASE_URL }) {
+  const isEdit = Boolean(picture);
 
   const [form, setForm] = useState({
     title: "",
-    content: "",
     tag: "",
-    // status: "active",
     image: null,
   });
 
@@ -20,26 +16,18 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isEdit && blog) {
+    if (isEdit && picture) {
       setForm({
-        title: blog.title || "",
-        content: blog.content || "",
-        tag: blog.tag || "",
-        // status: blog.status || "active",
+        title: picture.title || "",
+        tag: picture.tag || "",
         image: null,
       });
-      setPreview(blog.image ? `${BASE_URL}${blog.image}` : "");
+      setPreview(picture.image ? `${BASE_URL}/storage/${picture.image}` : "");
     } else {
-      setForm({
-        title: "",
-        content: "",
-        tag: "",
-        // status: "active",
-        image: null,
-      });
+      setForm({ title: "", tag: "", image: null });
       setPreview("");
     }
-  }, [blog, isEdit, isOpen]);
+  }, [picture, isEdit, isOpen]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -64,39 +52,39 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title.trim()) return toast.error("Title is required");
-    if (!form.content.trim()) return toast.error("Content is required");
-    if (!form.tag.trim()) return toast.error("Tag is required");
-  
+
+    const formData = new FormData();
+    formData.append("title", form.title);
+    formData.append("tag", form.tag);
+    formData.append("status", "active");
+    if (form.image) formData.append("image", form.image);
+    if (picture?.id) formData.append("id", picture.id);
+
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("title", form.title);
-      formData.append("content", form.content);
-      formData.append("tag", form.tag);
-      // formData.append("status", form.status);
-      if (form.image) formData.append("image", form.image);
-      if (isEdit && blog?.id) formData.append("id", blog.id);
-  
-      const route = isEdit ? `/blogs/update/${blog.id}?_method=PUT` : "/blogs/create";
-  
-      await apiClient.post(route, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-  
-      toast.success(`Blog ${isEdit ? "updated" : "added"} successfully!`);
-      onBlogSaved?.();
+
+        const route = isEdit ? `/portfolio/edit/${picture.id}?_method=PUT` : "/portfolio/store";
+        
+            await apiClient.post(route, formData, {
+              headers: { "Content-Type": "multipart/form-data" },
+            });
+        
+      // await apiClient.post("/portfolio/store", formData, {
+      //   headers: { "Content-Type": "multipart/form-data" },
+      // });
+      toast.success(`Signature look ${isEdit ? "updated" : "added"} successfully!`);
+      onSaved?.();
       onClose();
     } catch (err) {
       const message =
         err.response?.data?.message ||
         Object.values(err.response?.data?.errors || {})?.[0]?.[0] ||
-        `Failed to ${isEdit ? "update" : "save"} blog.`;
+        `Failed to ${isEdit ? "update" : "save"} signature look.`;
       toast.error(message);
     } finally {
       setLoading(false);
     }
   };
-  
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
@@ -118,8 +106,9 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
           <X className="w-7 h-7" />
         </button>
         <h2 className="text-2xl font-extrabold text-center mb-6 tracking-wide">
-          {isEdit ? "Edit Blog" : "Add Blog"}
+          {isEdit ? "Edit Signature Look" : "Add Signature Look"}
         </h2>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Title */}
           <div>
@@ -131,48 +120,36 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
                 value={form.title}
                 onChange={handleChange}
                 placeholder="Enter title..."
+                required
                 className="pl-10 py-2 w-full rounded bg-neutral-800 border border-yellow-700 placeholder-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               />
             </div>
           </div>
 
-          {/* Content with React Quill */}
-          <div>
-            <label className="font-semibold">Content</label>
-            <ReactQuill
-              theme="snow"
-              value={form.content}
-              onChange={(content) => setForm((prev) => ({ ...prev, content }))}
-              className="quill-editor bg-neutral-800 text-yellow-200 border-yellow-600 rounded"
-            />
-          </div>
-
           {/* Tag */}
           <div>
-            <label className="block font-semibold text-yellow-500 mb-2" htmlFor="tag">
-              Tag
-            </label>
-            <div className="relative">
-              <Tags className="absolute left-3 top-3 w-5 h-5 text-yellow-400" />
+            <label className="font-semibold">Tag</label>
+            <div className="relative mt-1">
+              <Tag className="absolute left-3 top-3 w-5 h-5 text-yellow-400" />
               <input
                 name="tag"
                 value={form.tag}
                 onChange={handleChange}
-                placeholder="e.g. Tech, Tips"
-                className="pl-10 py-2 w-full rounded bg-neutral-800 border border-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                placeholder="Enter tag..."
+                className="pl-10 py-2 w-full rounded bg-neutral-800 border border-yellow-700 placeholder-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               />
             </div>
           </div>
 
           {/* Image Upload */}
           <div>
-            <label className="font-semibold">Blog Image</label>
+            <label className="font-semibold">Image</label>
             <div
               className="relative flex items-center justify-center border-2 border-dashed border-yellow-600 rounded-lg p-4 bg-neutral-800 hover:border-yellow-400 transition"
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
             >
-              <ImagePlus className="w-6 h-6 text-yellow-500 mr-2" />
+              <UploadCloud className="w-6 h-6 text-yellow-500 mr-2" />
               <label htmlFor="image" className="cursor-pointer text-yellow-400 hover:underline">
                 Click or drag to upload
                 <input
@@ -186,18 +163,18 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
               </label>
             </div>
             {preview && (
-              <div className="pt-3 flex justify-center">
+              <div className="py-2 flex justify-center">
                 <img
                   src={preview}
-                  alt="Blog preview"
-                  className="max-h-56 rounded shadow border border-yellow-500"
+                  alt="Preview"
+                  className="max-h-48 rounded shadow border border-yellow-500"
                 />
               </div>
             )}
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end gap-4 pt-4">
+          <div className="flex justify-end gap-4 pt-3 mt-4">
             <button
               type="button"
               onClick={onClose}
@@ -216,7 +193,6 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
           </div>
         </form>
 
-        {/* Fade-in Animation */}
         <style>{`
           .animate-fade-in {
             animation: fadeInModal 0.25s ease-out;
@@ -224,27 +200,6 @@ export default function BlogAddEdit({ isOpen, onClose, onBlogSaved, blog = null,
           @keyframes fadeInModal {
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
-          }
-
-          /* Custom Quill Theme */
-          .quill-editor .ql-toolbar,
-          .quill-editor .ql-container {
-            background-color: #1f2937 !important;
-            border-color: #ca8a04 !important;
-            color: #facc15;
-          }
-
-          .quill-editor .ql-editor {
-            color: #fefcbf;
-            min-height: 150px;
-          }
-
-          .quill-editor .ql-toolbar button svg {
-            color: #facc15;
-          }
-
-          .quill-editor .ql-toolbar button:hover svg {
-            color: #fde68a;
           }
         `}</style>
       </div>

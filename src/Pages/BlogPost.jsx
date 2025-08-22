@@ -75,7 +75,8 @@ export default function BlogPost() {
       <img
         src={BASE_URL + post.image}
         alt={post.title}
-        className="w-full rounded-3xl shadow-lg mb-8 object-cover max-h-96 mx-auto"
+        // className="w-full rounded-3xl shadow-lg mb-8 object-cover max-h-96 mx-auto"
+        className="w-full rounded-3xl shadow-lg mb-8 object-cover mx-auto"
       />
 
       <section

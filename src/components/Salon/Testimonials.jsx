@@ -1,32 +1,6 @@
-// Testimonials.js
 import { Quote, Star } from "lucide-react";
-import { testimonials } from "../../constants";
-// Replace with real client reviews and images!
-// const testimonials = [
-//   {
-//     name: "Sarah Williams",
-//     image: "/images/client1.jpg",
-//     review:
-//       "My bridal hair was absolutely stunning and lasted all night! The team made me feel like royalty. I can’t recommend them enough.",
-//     rating: 5,
-//   },
-//   {
-//     name: "Jessica Lee",
-//     image: "/images/client2.jpg",
-//     review:
-//       "From color to cut, every visit is a treat. The stylists truly listen and bring my vision to life. I always leave feeling confident and beautiful.",
-//     rating: 5,
-//   },
-//   {
-//     name: "Emily Carter",
-//     image: "/images/client3.jpg",
-//     review:
-//       "The extensions are seamless and natural. I get compliments everywhere I go! The salon’s atmosphere is so welcoming and chic.",
-//     rating: 5,
-//   },
-// ];
 
-function Testimonials() {
+export default function Testimonials({ testimonials = [], BASE_URL }) {
   return (
     <section id="testimonials" className="py-20 bg-neutral-950">
       <div className="max-w-5xl mx-auto px-4">
@@ -56,7 +30,7 @@ function Testimonials() {
               className="bg-neutral-900 rounded-2xl p-8 flex flex-col items-center shadow-lg hover:shadow-yellow-400/20 transition"
             >
               <img
-                src={t.image}
+                src={`${BASE_URL}${t.image_url}`}
                 alt={t.name}
                 className="w-20 h-20 object-cover rounded-full border-4 border-yellow-400 mb-4 shadow-md"
               />
@@ -65,9 +39,7 @@ function Testimonials() {
                   <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                 ))}
               </div>
-              <p className="text-neutral-200 text-center italic mb-4">
-                “{t.review}”
-              </p>
+              <p className="text-neutral-200 text-center italic mb-4">“{t.review}”</p>
               <span className="font-semibold text-yellow-300">{t.name}</span>
             </div>
           ))}
@@ -77,4 +49,4 @@ function Testimonials() {
   );
 }
 
-export default Testimonials;
+

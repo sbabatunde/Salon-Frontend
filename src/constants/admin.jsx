@@ -1,8 +1,8 @@
 // src/components/sidebarData.js
-import { CalendarCheck, Users, Scissors, BarChart2, Settings, ClipboardList, Flower2, BookOpen } from "lucide-react";
+import { CalendarCheck, Users, Scissors, BarChart2, Settings, ClipboardList, Flower2, BookOpen, User } from "lucide-react";
 
 export const sidebarLinks = [
-  { label: "Dashboard", path: "", icon: <BarChart2 /> },
+  { label: "Dashboard", path: "dashboard", icon: <BarChart2 /> },
   { label: "Appointments", path: "appointments", icon: <CalendarCheck /> },
   { label: "Clients", path: "clients", icon: <Users /> },
   { label: "Blog", path: "blogs", icon: <BookOpen /> },
@@ -10,12 +10,14 @@ export const sidebarLinks = [
   { label: "Styles", path: "styles", icon: <Flower2 /> },
   { label: "Services", path: "services", icon: <ClipboardList /> },
   { label: "Inventory", path: "inventory", icon: <ClipboardList /> },
-  { label: "Reports", path: "reports", icon: <BarChart2 /> },
+  { label: "User Profile", path: "profile", icon: <User /> },
+  
   { label: "Manage Site", 
     path: "settings",
     icon: <Settings />,
     children: [
       { path: "settings", label: "Business Profile" },
+      { path: "portfolio", label: "Signature Looks" },
       { path: "video", label: "Site Video" },
     ],
   },

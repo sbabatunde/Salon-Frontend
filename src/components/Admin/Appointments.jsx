@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { Pencil, Trash,Eye } from "lucide-react";
+import { Pencil, Trash,Eye,Link2 } from "lucide-react";
 import apiClient from "../../api/axios";
 import EditAppointment from "./Modal/Appointments/EditAppointment";
 import ViewAppointment from "./Modal/Appointments/ViewAppointment";
@@ -72,6 +72,9 @@ export default function Appointments() {
     }
   };
   
+  //Send Testimoial Form links to clients
+  const baseUrl = "https://yourdomain.com/appointment/view/"; // Update this
+
 
   const handleDeleteConfirmed = async (appointments) => {
     try {
@@ -81,7 +84,7 @@ export default function Appointments() {
     } catch (error) {
       toast.error("Failed to delete service");
     } finally {
-      setModalType(null);
+      setDeleteModalOpen(null);
     }
   };
   
@@ -92,6 +95,27 @@ export default function Appointments() {
   const openViewModal = (appointment) => {
     setSelectedAppointment(appointment);
     setViewModalOpen(true);
+  };
+
+  const handleCopyLink = async (clientId) => {
+    try {
+      // Call API to get or create the invite link
+      const response = await apiClient.post('/testimonials/create-invite', {
+        client_id: clientId,
+      });
+  
+      const link = response.data.link;
+  
+      // Copy to clipboard using Clipboard API
+      await navigator.clipboard.writeText(link);
+  
+      // Notify user
+      toast.success(`Link copied! It expires in 30 minutes.`);
+  
+    } catch (error) {
+      console.error("Failed to generate or copy link:", error);
+      toast.error("Failed to generate link. Please try again.");
+    }
   };
 
   return (
@@ -114,7 +138,7 @@ export default function Appointments() {
           <table className="w-full">
             <thead className="bg-yellow-900/30">
               <tr>
-                {["Client", "Service", "Email", "Phone", "Date", "Time", "Status", "Actions"].map((header) => (
+                {["Client", "Service", "Phone", "Date", "Time", "Status", "Actions"].map((header) => (
                   <th key={header} className="px-6 py-4 text-yellow-200 text-left font-semibold text-sm">
                     {header}
                   </th>
@@ -126,7 +150,7 @@ export default function Appointments() {
                 <tr key={a.id} className="hover:bg-neutral-700/20 transition-colors">
                   <td className="px-6 py-4 text-yellow-100">{a.name}</td>
                   <td className="px-6 py-4 text-amber-400">{a.service}</td>
-                  <td className="px-6 py-4 text-yellow-100">{a.email}</td>
+                  {/* <td className="px-6 py-4 text-yellow-100">{a.email}</td> */}
                   <td className="px-6 py-4 text-yellow-100">{a.phone}</td>
                   <td className="px-6 py-4 text-yellow-100">{new Date(a.date).toLocaleDateString()}</td>
                   <td className="px-6 py-4 text-yellow-100">{a.time}</td>
@@ -153,13 +177,14 @@ export default function Appointments() {
                         <Eye size={18} />
                       </button>
 
-                      <button 
+                      <button
                         onClick={() => handleEdit(a)}
                         className="text-blue-400 hover:text-blue-300 transition-colors"
                         aria-label="Edit appointment"
                       >
                         <Pencil size={18} />
                       </button>
+
                       <button
                         onClick={() => handleDeleteModal(a)}
                         className="text-red-400 hover:text-red-300 transition-colors"
@@ -167,8 +192,21 @@ export default function Appointments() {
                       >
                         <Trash size={18} />
                       </button>
+
+                      {a.status === "Completed" && (
+                        <button
+                          onClick={() => handleCopyLink(a.id)}
+                          className="text-green-400 hover:text-green-300 transition-colors"
+                          aria-label="Copy testimonial invite link"
+                          type="button"
+                        >
+                          <Link2 size={18} />
+                        </button>
+                      )}
+
                     </div>
                   </td>
+
                 </tr>
               ))}
             </tbody>

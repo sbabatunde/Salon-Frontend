@@ -33,7 +33,7 @@ function BlogHighlights({ blogs = [], BASE_URL }) {
       <img
         src={`${BASE_URL}${post.image}`}
         alt={post.title}
-        className="w-full md:w-48 h-full object-cover"
+        className="w-full md:w-48 h-72 object-cover"
         loading="lazy"
       />
       <div className="p-6 flex flex-col justify-between">
