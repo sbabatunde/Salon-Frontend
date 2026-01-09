@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  User, Mail, MessageCircle, Loader2, Star, Image as ImageIcon, Smile, ThumbsUp
+  User, Mail, MessageCircle, Loader2, Star, Image as ImageIcon, 
+  Smile, ThumbsUp, Camera, X
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import apiClient from "../../src/api/axios";
 import { toast } from "react-toastify";
 
@@ -36,289 +38,434 @@ export default function TestimonialForm() {
       })
       .catch(err => {
         toast.error("This testimonial link is invalid or expired.");
-        setLoading(false);
       })
       .finally(() => setLoading(false));
   }, [token]);
 
-  // Handle input changes
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    // Clear error when user starts typing
     if (errors[e.target.name]) {
       setErrors(prev => ({ ...prev, [e.target.name]: null }));
     }
   };
 
-  // Handle image upload and preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setForm({ ...form, image: file });
-    // Clear image error when user selects a new file
-    if (errors.image) {
-      setErrors(prev => ({ ...prev, image: null }));
-    }
     if (file) {
+      // Validate file size (2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size must be less than 2MB");
+        return;
+      }
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error("Please select a valid image file");
+        return;
+      }
+
+      setForm({ ...form, image: file });
+      
+      if (errors.image) {
+        setErrors(prev => ({ ...prev, image: null }));
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
-    } else {
-      setImagePreview(null);
     }
   };
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  setSubmitting(true);
-  setErrors({});
-
-  try {
-    const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("email", form.email);
-    formData.append("review", form.review);
-    formData.append("rating", form.rating.toString()); // Ensure it's string
-    
-    // Only append image if it's a valid file and has size > 0
-    if (form.image instanceof File && form.image.size > 0) {
-      console.log('Appending image:', form.image.name, form.image.type, form.image.size);
-      formData.append("image", form.image);
-    } else if (form.image) {
-      console.log('Invalid image file:', form.image);
+  const removeImage = () => {
+    setForm({ ...form, image: null });
+    setImagePreview(null);
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
     }
+  };
 
-    await apiClient.post(`/testimonials/form/${token}`, formData,  {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setErrors({});
+
+    try {
+      const formData = new FormData();
+      formData.append("name", form.name);
+      formData.append("email", form.email);
+      formData.append("review", form.review);
+      formData.append("rating", form.rating.toString());
+      
+      if (form.image instanceof File && form.image.size > 0) {
+        formData.append("image", form.image);
+      }
+
+      await apiClient.post(`/testimonials/form/${token}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-    toast.success("Thank you for your testimonial! Redirecting...");
-    setTimeout(() => navigate("/"), 2500);
-    
-  } catch (err) {
-    console.error('Submission error:', err);
-    
-    if (err.response?.status === 422 && err.response?.data?.errors) {
-      const validationErrors = err.response.data.errors;
-      setErrors(validationErrors);
+      toast.success("Thank you for your testimonial! Redirecting...");
+      setTimeout(() => navigate("/"), 2500);
       
-      const firstError = Object.values(validationErrors)[0]?.[0];
-      if (firstError) {
-        toast.error(firstError);
+    } catch (err) {
+      if (err.response?.status === 422 && err.response?.data?.errors) {
+        const validationErrors = err.response.data.errors;
+        setErrors(validationErrors);
+        
+        const firstError = Object.values(validationErrors)[0]?.[0];
+        if (firstError) {
+          toast.error(firstError);
+        }
+      } else {
+        const errorMessage = err.response?.data?.message || 
+                            "Submission failed. Please try again.";
+        toast.error(errorMessage);
       }
-    } else {
-      const errorMessage = err.response?.data?.message || 
-                          "Submission failed. Please try again.";
-      toast.error(errorMessage);
+    } finally {
+      setSubmitting(false);
     }
-  } finally {
-    setSubmitting(false);
-  }
-};
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-950">
-        <Loader2 className="w-12 h-12 text-yellow-500 animate-spin" />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center"
+        >
+          <Loader2 className="w-12 h-12 text-yellow-500 animate-spin mx-auto mb-4" />
+          <p className="text-yellow-300">Loading testimonial form...</p>
+        </motion.div>
       </div>
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6 }
+    }
+  };
+
   return (
-    <section className="min-h-screen bg-neutral-950 py-16 flex items-center justify-center">
-      <div className="max-w-4xl w-full mx-auto px-4">
+    <section className="min-h-screen bg-neutral-950 py-8 flex items-center justify-center">
+      <div className="max-w-6xl w-full mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-10">
-          <div className="flex justify-center items-center gap-2 mb-3">
-            <ThumbsUp className="w-7 h-7 text-yellow-400" />
-            <span className="uppercase tracking-widest text-yellow-300 font-semibold text-sm">
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.div 
+            className="flex justify-center items-center gap-3 mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <ThumbsUp className="w-8 h-8 text-yellow-400" />
+            <span className="uppercase tracking-widest text-yellow-300 font-semibold text-lg">
               Share Your Experience
             </span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            <span className="bg-gradient-to-r from-yellow-500 to-red-800 text-transparent bg-clip-text">
+          </motion.div>
+          <motion.h1 
+            className="text-4xl sm:text-5xl font-black mb-4"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <span className="bg-gradient-to-r from-yellow-400 to-red-600 text-transparent bg-clip-text">
               Leave a Testimonial
             </span>
-          </h1>
-          <p className="text-lg text-neutral-300 max-w-xl mx-auto">
-            Your feedback helps us grow and inspire others. Please fill out the form below to share your experience!
-          </p>
-        </div>
+          </motion.h1>
+          <motion.p 
+            className="text-xl text-neutral-300 max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            Your feedback helps us grow and inspire others. Share your experience and help future clients make their decision!
+          </motion.p>
+        </motion.div>
+
         {/* Main Content */}
-        <div className="bg-neutral-900 rounded-2xl shadow-lg flex flex-col md:flex-row overflow-hidden">
+        <motion.div
+          className="bg-neutral-900 rounded-3xl shadow-2xl flex flex-col lg:flex-row overflow-hidden border border-yellow-500/10"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+        >
           {/* Form */}
           <form
             onSubmit={handleSubmit}
-            className="flex-1 p-8 flex flex-col gap-5"
+            className="flex-1 p-8 lg:p-12 flex flex-col gap-6"
             autoComplete="off"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <Smile className="w-6 h-6 text-yellow-400" />
-              <span className="font-semibold text-yellow-200">Your Testimonial</span>
-            </div>
-            <div className="flex flex-col gap-4">
+            <motion.div 
+              className="flex items-center gap-3 mb-4"
+              variants={itemVariants}
+            >
+              <div className="p-2 bg-yellow-500/10 rounded-lg">
+                <Smile className="w-6 h-6 text-yellow-400" />
+              </div>
+              <span className="font-bold text-yellow-200 text-xl">Your Testimonial</span>
+            </motion.div>
+
+            <motion.div
+              className="flex flex-col gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {/* Name and Email */}
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-yellow-200 mb-1">Full Name</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <motion.div variants={itemVariants}>
+                  <label className="block text-yellow-200 mb-2 font-semibold">Full Name</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-3 w-5 h-5 text-yellow-400" />
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-yellow-400" />
                     <input
                       type="text"
                       name="name"
                       required
                       value={form.name}
                       onChange={handleChange}
-                      className={`pl-10 py-2 w-full rounded bg-neutral-800 border text-yellow-100 focus:outline-none focus:ring-2 ${
-                        errors.name ? 'border-red-500 focus:ring-red-500' : 'border-yellow-700 focus:ring-yellow-500'
+                      className={`pl-12 pr-4 py-3 w-full rounded-xl bg-neutral-800 border text-yellow-100 focus:outline-none focus:ring-2 transition-all ${
+                        errors.name ? 'border-red-500 focus:ring-red-500' : 'border-yellow-500/20 focus:ring-yellow-500 focus:border-yellow-500'
                       }`}
                       placeholder="Your name"
                     />
                   </div>
                   {errors.name && (
-                    <p className="text-red-400 text-sm mt-1">{errors.name[0]}</p>
+                    <p className="text-red-400 text-sm mt-2">{errors.name[0]}</p>
                   )}
-                </div>
-                <div className="flex-1">
-                  <label className="block text-yellow-200 mb-1">Email</label>
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  <label className="block text-yellow-200 mb-2 font-semibold">Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 w-5 h-5 text-yellow-400" />
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-yellow-400" />
                     <input
                       type="email"
                       name="email"
                       required
                       value={form.email}
                       onChange={handleChange}
-                      className={`pl-10 py-2 w-full rounded bg-neutral-800 border text-yellow-100 focus:outline-none focus:ring-2 ${
-                        errors.email ? 'border-red-500 focus:ring-red-500' : 'border-yellow-700 focus:ring-yellow-500'
+                      className={`pl-12 pr-4 py-3 w-full rounded-xl bg-neutral-800 border text-yellow-100 focus:outline-none focus:ring-2 transition-all ${
+                        errors.email ? 'border-red-500 focus:ring-red-500' : 'border-yellow-500/20 focus:ring-yellow-500 focus:border-yellow-500'
                       }`}
                       placeholder="Your email"
                     />
                   </div>
                   {errors.email && (
-                    <p className="text-red-400 text-sm mt-1">{errors.email[0]}</p>
+                    <p className="text-red-400 text-sm mt-2">{errors.email[0]}</p>
                   )}
-                </div>
+                </motion.div>
               </div>
-              {/* Review */}
-              <div>
-                <label className="block text-yellow-200 mb-1">Your Message</label>
-                <div className="relative">
-                  <MessageCircle className="absolute left-3 top-3 w-5 h-5 text-yellow-400" />
-                  <textarea
-                    name="review"
-                    required
-                    value={form.review}
-                    onChange={handleChange}
-                    rows="4"
-                    className={`pl-10 py-2 w-full rounded bg-neutral-800 border text-yellow-100 focus:outline-none focus:ring-2 ${
-                      errors.review ? 'border-red-500 focus:ring-red-500' : 'border-yellow-700 focus:ring-yellow-500'
-                    }`}
-                    placeholder="Share your feedback..."
-                  />
-                </div>
-                {errors.review && (
-                  <p className="text-red-400 text-sm mt-1">{errors.review[0]}</p>
-                )}
-              </div>
+
               {/* Rating */}
-              <div>
-                <label className="block text-yellow-200 mb-1">Rating</label>
+              <motion.div variants={itemVariants}>
+                <label className="block text-yellow-200 mb-2 font-semibold">Rating</label>
                 <div className="relative">
-                  <Star className="absolute left-3 top-3 w-5 h-5 text-yellow-400" />
+                  <Star className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-yellow-400" />
                   <select
                     name="rating"
                     value={form.rating}
                     onChange={handleChange}
-                    className={`pl-10 py-2 w-full rounded bg-neutral-800 border text-yellow-100 focus:outline-none focus:ring-2 ${
-                      errors.rating ? 'border-red-500 focus:ring-red-500' : 'border-yellow-700 focus:ring-yellow-500'
+                    className={`pl-12 pr-4 py-3 w-full rounded-xl bg-neutral-800 border text-yellow-100 focus:outline-none focus:ring-2 transition-all ${
+                      errors.rating ? 'border-red-500 focus:ring-red-500' : 'border-yellow-500/20 focus:ring-yellow-500 focus:border-yellow-500'
                     }`}
                   >
                     {[5, 4, 3, 2, 1].map((rate) => (
                       <option key={rate} value={rate}>
-                        {Array(rate).fill('★').join('')} ({rate})
+                        {'★'.repeat(rate)} {rate} Star{rate !== 1 ? 's' : ''}
                       </option>
                     ))}
                   </select>
                 </div>
                 {errors.rating && (
-                  <p className="text-red-400 text-sm mt-1">{errors.rating[0]}</p>
+                  <p className="text-red-400 text-sm mt-2">{errors.rating[0]}</p>
                 )}
-              </div>
-              {/* Image Upload with Preview */}
-              <div>
-                <label className="block text-yellow-200 mb-1">Photo (optional)</label>
-                <div className="flex items-center gap-4">
-                  <label className="relative cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      ref={imageInputRef}
-                      onChange={handleImageChange}
-                    />
-                    <div className={`flex items-center px-4 py-2 bg-neutral-800 border rounded text-yellow-100 hover:bg-neutral-700 transition ${
-                      errors.image ? 'border-red-500' : 'border-yellow-700'
-                    }`}>
-                      <ImageIcon className="w-5 h-5 mr-2 text-yellow-400" />
-                      {form.image?.name || "Choose Image"}
-                    </div>
-                  </label>
-                  {imagePreview && (
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-16 h-16 rounded object-cover border-2 border-yellow-500 shadow"
-                    />
+              </motion.div>
+
+              {/* Review */}
+              <motion.div variants={itemVariants}>
+                <label className="block text-yellow-200 mb-2 font-semibold">Your Message</label>
+                <div className="relative">
+                  <MessageCircle className="absolute left-4 top-4 w-5 h-5 text-yellow-400" />
+                  <textarea
+                    name="review"
+                    required
+                    value={form.review}
+                    onChange={handleChange}
+                    rows="6"
+                    className={`pl-12 pr-4 py-3 w-full rounded-xl bg-neutral-800 border text-yellow-100 focus:outline-none focus:ring-2 transition-all resize-none ${
+                      errors.review ? 'border-red-500 focus:ring-red-500' : 'border-yellow-500/20 focus:ring-yellow-500 focus:border-yellow-500'
+                    }`}
+                    placeholder="Share your experience with Precious Hairmpire..."
+                  />
+                </div>
+                {errors.review && (
+                  <p className="text-red-400 text-sm mt-2">{errors.review[0]}</p>
+                )}
+              </motion.div>
+
+              {/* Image Upload */}
+              <motion.div variants={itemVariants}>
+                <label className="block text-yellow-200 mb-2 font-semibold">Photo (optional)</label>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <label className="relative cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={imageInputRef}
+                        onChange={handleImageChange}
+                      />
+                      <motion.div 
+                        className={`flex items-center px-6 py-3 bg-neutral-800 border rounded-xl text-yellow-100 hover:bg-neutral-700 transition-all ${
+                          errors.image ? 'border-red-500' : 'border-yellow-500/20 hover:border-yellow-500/40'
+                        }`}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Camera className="w-5 h-5 mr-3 text-yellow-400" />
+                        {form.image?.name || "Choose Image"}
+                      </motion.div>
+                    </label>
+                    
+                    <AnimatePresence>
+                      {imagePreview && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          className="relative"
+                        >
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-20 h-20 rounded-xl object-cover border-2 border-yellow-500 shadow-lg"
+                          />
+                          <motion.button
+                            type="button"
+                            onClick={removeImage}
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition-colors"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <X className="w-3 h-3" />
+                          </motion.button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  <div className="text-sm text-neutral-400">
+                    Max size: 2MB. JPG, PNG, or GIF. Show us your amazing hair transformation!
+                  </div>
+                  {errors.image && (
+                    <p className="text-red-400 text-sm mt-2">{errors.image[0]}</p>
                   )}
                 </div>
-                <div className="text-xs text-neutral-400 mt-1">Max size: 2MB. JPG, PNG, or GIF.</div>
-                {errors.image && (
-                  <p className="text-red-400 text-sm mt-1">{errors.image[0]}</p>
-                )}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
+
             {/* Submit Button */}
-            <button
+            <motion.button
               type="submit"
               disabled={submitting}
-              className="mt-6 py-3 rounded-full bg-gradient-to-r from-yellow-500 to-red-800 text-white font-bold text-lg shadow-lg hover:from-yellow-600 hover:to-red-900 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-6 py-4 rounded-xl bg-gradient-to-r from-yellow-500 to-red-800 text-white font-bold text-lg shadow-2xl hover:from-yellow-600 hover:to-red-900 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  <Loader2 className="w-6 h-6 animate-spin" />
                   Submitting...
                 </>
               ) : (
                 <>
-                  <MessageCircle className="w-5 h-5 mr-2" />
+                  <MessageCircle className="w-6 h-6" />
                   Submit Testimonial
                 </>
               )}
-            </button>
+            </motion.button>
           </form>
+
           {/* Sidebar */}
-          <div className="hidden md:flex flex-col justify-center items-center bg-gradient-to-b from-yellow-500/90 to-red-800/90 px-8 w-80">
-            <h2 className="text-2xl font-bold text-white mb-4 text-center">Why Leave a Testimonial?</h2>
-            <ul className="text-yellow-50 space-y-3 text-lg">
-              <li>🌟 Help others trust our service</li>
-              <li>💬 Your voice matters</li>
-              <li>🏆 We value your feedback</li>
-              <li>🎁 Surprise rewards for top testimonials</li>
-              <li>🤝 Join our happy community</li>
-            </ul>
-            <div className="mt-8 text-center text-yellow-100 text-sm">
-              <div>Need help?</div>
-              <a href="tel:+2348061514604" className="underline hover:text-white">
-                +234 806 151 4604
-              </a>
-              <br />
-              <a href="mailto:info@precioushairmpire.com" className="underline hover:text-white">
-                info@precioushairmpire.com
-              </a>
+          <div className="hidden lg:flex flex-col justify-center items-center bg-gradient-to-br from-yellow-500/90 to-red-800/90 px-8 w-96 relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-10 right-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+              <div className="absolute bottom-10 left-10 w-40 h-40 bg-yellow-300 rounded-full blur-3xl"></div>
+            </div>
+
+            <div className="relative z-10 text-center">
+              <motion.h2 
+                className="text-3xl font-bold text-white mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                Why Share Your Story?
+              </motion.h2>
+              
+              <motion.ul 
+                className="text-yellow-50 space-y-4 text-lg mb-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.9 }}
+              >
+                {[
+                  { icon: "🌟", text: "Help others trust our service" },
+                  { icon: "💬", text: "Your voice matters to us" },
+                  { icon: "🏆", text: "We value your honest feedback" },
+                  { icon: "🎁", text: "Surprise rewards for top testimonials" },
+                  { icon: "🤝", text: "Join our happy community" }
+                ].map((item, index) => (
+                  <motion.li 
+                    key={index}
+                    className="flex items-center gap-3"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1 + index * 0.1 }}
+                  >
+                    <span className="text-2xl">{item.icon}</span>
+                    {item.text}
+                  </motion.li>
+                ))}
+              </motion.ul>
+
+              <motion.div 
+                className="text-center text-yellow-100 text-sm bg-white/10 backdrop-blur-lg rounded-2xl p-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.5 }}
+              >
+                <div className="font-semibold mb-2">Need help?</div>
+                <a href="tel:+2348061514604" className="underline hover:text-white transition-colors block">
+                  +234 806 151 4604
+                </a>
+                <a href="mailto:info@precioushairmpire.com" className="underline hover:text-white transition-colors block">
+                  info@precioushairmpire.com
+                </a>
+              </motion.div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

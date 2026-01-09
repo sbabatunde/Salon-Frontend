@@ -1,23 +1,3 @@
-// import axios from 'axios';
-
-// const apiClient = axios.create({
-//     // baseURL: 'http://localhost:8000/api', // Laravel API base URL
-//     baseURL:import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000' +'/api',
-//     headers: {
-//         'Content-Type': 'application/json',
-//         // Accept: 'application/json',
-//     },
-//     withCredentials: true, // Required for Laravel Sanctum
-// });
-
-
-// // new addition 
-
-
-
-// export default apiClient;
-
-
 import axios from 'axios';
 
 const apiClient = axios.create({
@@ -25,13 +5,20 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
-// Add the same CSRF token interceptor
+// Fix the interceptor to preserve multipart/form-data
 apiClient.interceptors.request.use((config) => {
   const token = getCookie('XSRF-TOKEN');
   if (token) {
     config.headers['X-XSRF-TOKEN'] = decodeURIComponent(token);
+  }
+  
+  // Only set JSON content type if it's not FormData
+  if (!(config.data instanceof FormData)) {
     config.headers['Content-Type'] = 'application/json';
   }
+  // If it's FormData, let the browser set the Content-Type automatically
+  // This is crucial for file uploads with proper boundary
+  
   return config;
 });
 

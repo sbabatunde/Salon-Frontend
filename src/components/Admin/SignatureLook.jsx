@@ -19,7 +19,7 @@ export default function SignatureLooks() {
   const fetchSignatureLooks = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get("/portfolio/all");
+      const res = await apiClient.get("/portfolio/index");
 
       setPictures(res.data || []);
     } catch (err) {

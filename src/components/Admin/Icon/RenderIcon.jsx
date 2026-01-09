@@ -1,33 +1,110 @@
-import React, { useState, useMemo } from "react";
+// src/utils/icons.jsx
 import * as LucideIcons from "lucide-react";
 
-// List of icon names you want to allow for selection (can be expanded)
-const ICON_NAMES = [
-  "Scissors",
-  "Brush",
-  "Sparkles",
-  "Flower2",
-  "Star",
-  "Heart",
-  "Sun",
-  "Moon",
-  "Cloud",
-  "Zap",
-  "Anchor",
-  "Bell",
-  "Camera",
-  "Coffee",
-  "Gift",
-  "Globe",
-  "Home",
-  "Music",
-  "Phone",
-  "Smile",
-];
+// Map of icon names to components (using actual available icon names)
+const ICON_COMPONENTS = {
+  LayoutDashboard: LucideIcons.LayoutDashboard,
+  Calendar: LucideIcons.Calendar,
+  Scissors: LucideIcons.Scissors,
+  Users: LucideIcons.Users,
+  DollarSign: LucideIcons.DollarSign,
+  Package: LucideIcons.Package,
+  MessageSquare: LucideIcons.MessageSquare,
+  Sparkles: LucideIcons.Sparkles,
+  FileText: LucideIcons.FileText,
+  Settings: LucideIcons.Settings,
+  TrendingUp: LucideIcons.TrendingUp,
+  Award: LucideIcons.Award,
+  Home: LucideIcons.Home,
+  BarChart3: LucideIcons.BarChart3,
+  ClipboardList: LucideIcons.ClipboardList,
+  ShoppingBag: LucideIcons.ShoppingBag,
+  UserCircle: LucideIcons.UserCircle,
+  CreditCard: LucideIcons.CreditCard,
+  Layers: LucideIcons.Layers,
+  Star: LucideIcons.Star,
+  Edit: LucideIcons.Edit,
+  Trash2: LucideIcons.Trash2,
+  Eye: LucideIcons.Eye,
+  Plus: LucideIcons.Plus,
+  Search: LucideIcons.Search,
+  Filter: LucideIcons.Filter,
+  ChevronDown: LucideIcons.ChevronDown,
+  ChevronRight: LucideIcons.ChevronRight,
+  Menu: LucideIcons.Menu,
+  X: LucideIcons.X,
+  LogOut: LucideIcons.LogOut,
+  User: LucideIcons.User,
+  Check: LucideIcons.Check,
+  AlertCircle: LucideIcons.AlertCircle,
+  RefreshCw: LucideIcons.RefreshCw,
+  Download: LucideIcons.Download,
+  Upload: LucideIcons.Upload,
+  MoreVertical: LucideIcons.MoreVertical,
+  Phone: LucideIcons.Phone,
+  Mail: LucideIcons.Mail,
+  MapPin: LucideIcons.MapPin,
+  Clock: LucideIcons.Clock,
+  Tag: LucideIcons.Tag,
+  Percent: LucideIcons.Percent,
+  TrendingDown: LucideIcons.TrendingDown,
+  ArrowUpRight: LucideIcons.ArrowUpRight,
+  ArrowDownRight: LucideIcons.ArrowDownRight,
+  BarChart: LucideIcons.BarChart,
+  PieChart: LucideIcons.PieChart,
+  LineChart: LucideIcons.LineChart,
+  Bell: LucideIcons.Bell,
+  HelpCircle: LucideIcons.HelpCircle,
+  Shield: LucideIcons.Shield,
+  Lock: LucideIcons.Lock,
+  Unlock: LucideIcons.Unlock,
+  Camera: LucideIcons.Camera,
+  Image: LucideIcons.Image,
+  Video: LucideIcons.Video,
+  Mic: LucideIcons.Mic,
+  Headphones: LucideIcons.Headphones,
+  Music: LucideIcons.Music,
+  Film: LucideIcons.Film,
+  BookOpen: LucideIcons.BookOpen,
+  Book: LucideIcons.Book,
+  Feather: LucideIcons.Feather,
+  PenTool: LucideIcons.PenTool,
+  Palette: LucideIcons.Palette,
+  Droplets: LucideIcons.Droplets,
+  Cloud: LucideIcons.Cloud,
+  Sun: LucideIcons.Sun,
+  Moon: LucideIcons.Moon,
+  Zap: LucideIcons.Zap,
+  Wind: LucideIcons.Wind,
+  Thermometer: LucideIcons.Thermometer,
+  Umbrella: LucideIcons.Umbrella,
+  Globe: LucideIcons.Globe,
+  Map: LucideIcons.Map,
+  Navigation: LucideIcons.Navigation,
+  Compass: LucideIcons.Compass,
+  Flag: LucideIcons.Flag,
+  Award: LucideIcons.Award,
+  Trophy: LucideIcons.Trophy,
+  Gift: LucideIcons.Gift,
+  Heart: LucideIcons.Heart,
+  Smile: LucideIcons.Smile,
+  Frown: LucideIcons.Frown,
+  Meh: LucideIcons.Meh,
+  ThumbsUp: LucideIcons.ThumbsUp,
+  ThumbsDown: LucideIcons.ThumbsDown,
+  StarHalf: LucideIcons.StarHalf,
+};
 
-// Helper to render icon by name
-function RenderIcon({ iconName, className }) {
-  const IconComponent = LucideIcons[iconName];
-  if (!IconComponent) return null;
-  return <IconComponent className={className} />;
-}
+// Helper function to get icon component by name
+export const getIconComponent = (iconName) => {
+  return ICON_COMPONENTS[iconName] || LucideIcons.Scissors; // Fallback to Scissors
+};
+
+// Render icon component
+export const RenderIcon = ({ iconName, className = "w-4 h-4", ...props }) => {
+  const IconComponent = getIconComponent(iconName);
+  return <IconComponent className={className} {...props} />;
+};
+
+// List of available icon names
+export const AVAILABLE_ICONS = Object.keys(ICON_COMPONENTS);

@@ -65,13 +65,10 @@ export default function SignatureLookAddEdit({ isOpen, onClose, onSaved, picture
 
         const route = isEdit ? `/portfolio/edit/${picture.id}?_method=PUT` : "/portfolio/store";
         
-            await apiClient.post(route, formData, {
+         const res =   await apiClient.post(route, formData, {
               headers: { "Content-Type": "multipart/form-data" },
             });
-        
-      // await apiClient.post("/portfolio/store", formData, {
-      //   headers: { "Content-Type": "multipart/form-data" },
-      // });
+      console.log(res);
       toast.success(`Signature look ${isEdit ? "updated" : "added"} successfully!`);
       onSaved?.();
       onClose();
