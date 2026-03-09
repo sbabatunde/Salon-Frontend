@@ -99,7 +99,7 @@ export default function BookAppointment() {
     };
 
     return (
-        <section className="min-h-screen bg-neutral-950 py-8 flex items-center justify-center">
+        <section className="min-h-screen bg-neutral-950 py-12 lg:mt-5 flex items-center justify-center">
             <div className="max-w-6xl w-full mx-auto px-4">
                 {/* Header */}
                 <motion.div

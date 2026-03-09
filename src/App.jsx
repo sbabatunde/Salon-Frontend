@@ -21,14 +21,14 @@ import TestimonialForm from './Pages/TestimonialForm.jsx';
 import AdminLogin from './Pages/AdminLogin.jsx';
 import UpdateUserProfile from './Pages/UpdateUserProfile.jsx';
 
-import Dashboard from './components/Admin/Dashboard.jsx';
+import Dashboard from './components/Admin/Dashboard/Dashboard.jsx';
 import Appointments from './components/Admin/Appointments.jsx';
 import Clients from './components/Admin/Clients.jsx';
 import Services from './components/Admin/Services.jsx';
 import Settings from './components/Admin/Settings.jsx';
 import Reports from './components/Admin/Reports.jsx';
 import Inventory from './components/Admin/Inventory.jsx';
-import Stylists from './components/Admin/Stylists.jsx';
+import Stylists from './components/Admin/Stylist.jsx';
 import Styles from './components/Admin/Styles.jsx';
 import Blogs from './components/Admin/Blogs.jsx';
 import SignatureLooks from './components/Admin/SignatureLook.jsx';

@@ -6,14 +6,14 @@ export const sidebarLinks = [
   { label: "Appointments", path: "appointments", icon: <CalendarCheck /> },
   { label: "Clients", path: "clients", icon: <Users /> },
   { label: "Blog", path: "blogs", icon: <BookOpen /> },
-  // { label: "Stylists", path: "stylists", icon: <Scissors /> },
+  { label: "Stylists", path: "stylists", icon: <Scissors /> },
   { label: "Styles", path: "styles", icon: <Flower2 /> },
   { label: "Services", path: "services", icon: <ClipboardList /> },
   { label: "Inventory", path: "inventory", icon: <ClipboardList /> },
   { label: "User Profile", path: "profile", icon: <User /> },
   
   { label: "Manage Site", 
-    path: "settings",
+    // path: "settings",
     icon: <Settings />,
     children: [
       { path: "settings", label: "Business Profile" },

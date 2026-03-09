@@ -22,6 +22,7 @@ export default function HomePage() {
   const [activeVideos, setActiveVideos] = useState([]);
   const [activeLooks, setActiveLooks] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const [stylists, setStylists] = useState([]);
   const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   // Smooth scroll for hash links
@@ -50,14 +51,16 @@ export default function HomePage() {
           blogsResponse,
           videosResponse,
           portfolioResponse,
-          testimonialsResponse
+          testimonialsResponse,
+          stylistsResponse
         ] = await Promise.all([
           apiClient.get("/settings/business/details/fetch"),
           apiClient.get("/services/list"),
           apiClient.get("/blogs/show/active"),
           apiClient.get("/videos/active"),
           apiClient.get("/portfolio/show"),
-          apiClient.get("/testimonials")
+          apiClient.get("/testimonials"),
+          apiClient.get("/stylist")
         ]);
 
         setBusinessInfo(businessResponse.data?.data || []);
@@ -66,6 +69,7 @@ export default function HomePage() {
         setActiveVideos(videosResponse.data || []);
         setActiveLooks(portfolioResponse.data || []);
         setTestimonials(testimonialsResponse.data || []);
+        setStylists(stylistsResponse.data?.data || []);
         
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch data");
@@ -107,7 +111,7 @@ export default function HomePage() {
       <Portfolio images={activeLooks} BASE_URL={BASE_URL} />
       <Testimonials testimonials={testimonials} BASE_URL={BASE_URL} />
       <About />
-      <Team />
+      <Team stylists={stylists} /> 
       <Booking />
       <ContactInfo businessInfo={businessInfo} />
       <BlogHighlights blogs={blogs} BASE_URL={BASE_URL} />

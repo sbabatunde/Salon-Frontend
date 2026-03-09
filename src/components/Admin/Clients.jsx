@@ -5,13 +5,12 @@ import {
   Trash, 
   Eye, 
   DollarSign, 
-  TrendingUp,
   Download,
   User,
   Phone,
-  Mail,
   Scissors,
-  Calendar
+  Calendar,
+  TrendingUp
 } from "lucide-react";
 import apiClient from "../../api/axios";
 import EditClientModal from "./Modal/Clients/EditClient";
@@ -73,7 +72,6 @@ export default function Clients() {
 
   const handleSaveClient = async (updatedClient) => {
     try {
-
       await apiClient.put(`/clients/${updatedClient.id}`, updatedClient);
       toast.success("Client updated successfully!");
       setIsEditModalOpen(false);
@@ -147,62 +145,59 @@ export default function Clients() {
   return (
     <div className="p-6 bg-neutral-900 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header with Export */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-yellow-200 mb-2">Client Management</h1>
-            <p className="text-yellow-100/70">Manage completed clients and financial records</p>
-          </div>
+          <h1 className="text-3xl font-bold text-yellow-200">Client Management</h1>
           
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-800 text-white rounded-lg hover:from-green-700 hover:to-emerald-900 transition mt-4 md:mt-0"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-800 text-white rounded-lg hover:from-green-700 hover:to-emerald-900 transition mt-4 md:mt-0"
           >
             <Download size={18} />
             Export CSV
           </button>
         </div>
 
-        {/* Financial Summary Cards */}
+        {/* Financial Summary Cards - Compact */}
         {financialSummary && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-gradient-to-r from-blue-900/50 to-blue-800/30 p-6 rounded-xl border border-blue-700/30">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="bg-gradient-to-r from-blue-900/50 to-blue-800/30 p-4 rounded-xl border border-blue-700/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-200 text-sm font-medium">Total Revenue</p>
-                  <p className="text-2xl font-bold text-white">₦{financialSummary.total_revenue?.toLocaleString()}</p>
+                  <p className="text-blue-200 text-xs">Revenue</p>
+                  <p className="text-lg font-bold text-white">₦{financialSummary.total_revenue?.toLocaleString()}</p>
                 </div>
-                <DollarSign className="w-10 h-10 text-blue-300" />
+                <DollarSign className="w-8 h-8 text-blue-300" />
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-red-900/50 to-red-800/30 p-6 rounded-xl border border-red-700/30">
+            <div className="bg-gradient-to-r from-red-900/50 to-red-800/30 p-4 rounded-xl border border-red-700/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-red-200 text-sm font-medium">Total Cost</p>
-                  <p className="text-2xl font-bold text-white">₦{financialSummary.total_cost?.toLocaleString()}</p>
+                  <p className="text-red-200 text-xs">Cost</p>
+                  <p className="text-lg font-bold text-white">₦{financialSummary.total_cost?.toLocaleString()}</p>
                 </div>
-                <TrendingUp className="w-10 h-10 text-red-300" />
+                <TrendingUp className="w-8 h-8 text-red-300" />
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-900/50 to-green-800/30 p-6 rounded-xl border border-green-700/30">
+            <div className="bg-gradient-to-r from-green-900/50 to-green-800/30 p-4 rounded-xl border border-green-700/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-200 text-sm font-medium">Total Profit</p>
-                  <p className="text-2xl font-bold text-white">₦{financialSummary.total_profit?.toLocaleString()}</p>
+                  <p className="text-green-200 text-xs">Profit</p>
+                  <p className="text-lg font-bold text-white">₦{financialSummary.total_profit?.toLocaleString()}</p>
                 </div>
-                <TrendingUp className="w-10 h-10 text-green-300" />
+                <TrendingUp className="w-8 h-8 text-green-300" />
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-yellow-900/50 to-amber-800/30 p-6 rounded-xl border border-yellow-700/30">
+            <div className="bg-gradient-to-r from-yellow-900/50 to-amber-800/30 p-4 rounded-xl border border-yellow-700/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-yellow-200 text-sm font-medium">Total Clients</p>
-                  <p className="text-2xl font-bold text-white">{financialSummary.total_clients}</p>
+                  <p className="text-yellow-200 text-xs">Total Clients</p>
+                  <p className="text-lg font-bold text-white">{financialSummary.total_clients}</p>
                 </div>
-                <User className="w-10 h-10 text-yellow-300" />
+                <User className="w-8 h-8 text-yellow-300" />
               </div>
             </div>
           </div>
@@ -218,12 +213,12 @@ export default function Clients() {
           />
         </div>
 
-        {/* Clients Table */}
+        {/* Clients Table - Clean like Appointments */}
         <div className="bg-neutral-800 rounded-xl shadow-2xl overflow-hidden">
           <table className="w-full">
             <thead className="bg-yellow-900/30">
               <tr>
-                {["Client", "Contact", "Service", "Date", "Financials", "Actions"].map((header) => (
+                {["Client","Service", "Date", "Financials", "Actions"].map((header) => (
                   <th key={header} className="px-6 py-4 text-yellow-200 text-left font-semibold text-sm">
                     {header}
                   </th>
@@ -235,62 +230,64 @@ export default function Clients() {
                 <tr key={client.id} className="hover:bg-neutral-700/20 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-yellow-800/30 flex items-center justify-center mr-3">
-                        <User className="w-5 h-5 text-yellow-300" />
+                      <div className="w-8 h-8 rounded-full bg-yellow-800/30 flex items-center justify-center mr-3">
+                        <User className="w-4 h-4 text-yellow-300" />
                       </div>
                       <div>
                         <p className="text-yellow-100 font-medium">{client.name}</p>
-                        <p className="text-sm text-yellow-100/70">{client.email}</p>
+                        {/* <p className="text-xs text-yellow-100/70">{client.email}</p> */}
+                        <p className="text-xs text-yellow-100/70">
+                          <Phone size={14} />
+                          {client.phone}
+                      </p>
                       </div>
                     </div>
                   </td>
+                  {/* <td className="px-6 py-4">
+                    <div className="flex items-center gap-2 text-yellow-100 text-sm">
+                      <Phone size={14} />
+                      {client.phone}
+                    </div>
+                  </td> */}
                   <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-yellow-100">
-                        <Phone size={14} />
-                        {client.phone}
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Scissors size={14} className="text-amber-400" />
+                      <span className="text-amber-400 text-sm">{client.service}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <Scissors size={16} className="text-amber-400" />
-                      <span className="text-amber-400">{client.service}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-yellow-100">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} className="text-yellow-400" />
+                    <div className="flex items-center gap-2 text-yellow-100 text-sm">
+                      <Calendar size={14} className="text-yellow-400" />
                       {new Date(client.date).toLocaleDateString()}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-green-400 text-sm">Paid:</span>
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-green-400">Paid:</span>
                         <span className="text-green-300 font-medium">
                           ₦{client.account?.amount_paid?.toLocaleString() || "0"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-red-400 text-sm">Cost:</span>
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-red-400">Cost:</span>
                         <span className="text-red-300 font-medium">
                           ₦{client.account?.total_cost?.toLocaleString() || "0"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-blue-400 text-sm">Profit:</span>
-                        <span className={`font-bold ${(client.account?.profit || 0) >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-blue-400">Profit:</span>
+                        <span className={`font-medium ${(client.account?.profit || 0) >= 0 ? 'text-green-300' : 'text-red-300'}`}>
                           ₦{client.account?.profit?.toLocaleString() || "0"}
                         </span>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => openViewModal(client)}
-                        className="text-yellow-400 hover:text-yellow-300 p-2 rounded-lg hover:bg-yellow-900/20"
+                        className="text-yellow-400 hover:text-yellow-300 p-1 rounded hover:bg-yellow-900/20"
                         title="View Details"
                       >
                         <Eye size={18} />
@@ -298,7 +295,7 @@ export default function Clients() {
 
                       <button
                         onClick={() => handleEdit(client)}
-                        className="text-blue-400 hover:text-blue-300 p-2 rounded-lg hover:bg-blue-900/20"
+                        className="text-blue-400 hover:text-blue-300 p-1 rounded hover:bg-blue-900/20"
                         title="Edit Client"
                       >
                         <Pencil size={18} />
@@ -306,7 +303,7 @@ export default function Clients() {
 
                       <button
                         onClick={() => handleFinancialModal(client)}
-                        className="text-green-400 hover:text-green-300 p-2 rounded-lg hover:bg-green-900/20"
+                        className="text-green-400 hover:text-green-300 p-1 rounded hover:bg-green-900/20"
                         title="Add Financial Record"
                       >
                         <DollarSign size={18} />
@@ -314,7 +311,7 @@ export default function Clients() {
 
                       <button
                         onClick={() => handleDeleteModal(client)}
-                        className="text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-red-900/20"
+                        className="text-red-400 hover:text-red-300 p-1 rounded hover:bg-red-900/20"
                         title="Delete Client"
                       >
                         <Trash size={18} />

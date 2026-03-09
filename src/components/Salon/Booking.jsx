@@ -66,7 +66,7 @@ function Booking() {
         />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4">
+      <div id="booking" className="relative z-10 max-w-6xl mx-auto px-4">
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
