@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
 const login = async (email, password) => {
   try {
     await apiClient.get('/sanctum/csrf-cookie');
-    await apiClient.post('/login', { email, password });
+    await apiClient.post('/api/login', { email, password });
     await fetchUser();
     return user;  // Return the latest user
   } catch (err) {
