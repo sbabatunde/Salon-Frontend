@@ -1,7 +1,8 @@
 // src/components/sidebarData.js
-import { CalendarCheck, Users, Scissors, BarChart2, Settings, ClipboardList, Flower2, BookOpen, User } from "lucide-react";
+import { CalendarCheck, Users, Scissors,House,BarChart2, Settings, ClipboardList, Flower2, BookOpen, User } from "lucide-react";
 
 export const sidebarLinks = [
+  // { label: "Home", path: "/home", icon: <House /> },
   { label: "Dashboard", path: "dashboard", icon: <BarChart2 /> },
   { label: "Appointments", path: "appointments", icon: <CalendarCheck /> },
   { label: "Clients", path: "clients", icon: <Users /> },

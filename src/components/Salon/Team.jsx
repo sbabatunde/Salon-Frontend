@@ -2,7 +2,7 @@ import { User, Award, Instagram, Mail, Sparkles, Star, Briefcase, Phone } from "
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-function Team({ stylists = [] }) {
+function Team({ stylists = [],BASE_URL }) {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [imageErrors, setImageErrors] = useState({});
 
@@ -172,7 +172,7 @@ function Team({ stylists = [] }) {
                       <div className="relative">
                         {member.image && !hasImageError ? (
                           <img
-                            src={member.image}
+                            src={`${BASE_URL}/storage/${member.image}`}
                             alt={member.name}
                             className="w-36 h-36 object-cover rounded-full border-4 border-neutral-800 shadow-2xl relative z-10"
                             onError={() => handleImageError(member.id)}

@@ -111,7 +111,7 @@ export default function HomePage() {
       <Portfolio images={activeLooks} BASE_URL={BASE_URL} />
       <Testimonials testimonials={testimonials} BASE_URL={BASE_URL} />
       <About />
-      <Team stylists={stylists} /> 
+      <Team stylists={stylists} BASE_URL={BASE_URL} /> 
       <Booking />
       <ContactInfo businessInfo={businessInfo} />
       <BlogHighlights blogs={blogs} BASE_URL={BASE_URL} />

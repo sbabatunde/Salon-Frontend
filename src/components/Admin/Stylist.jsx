@@ -32,11 +32,14 @@ export default function Stylists() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [stats, setStats] = useState(null);
+  const [imageErrors, setImageErrors] = useState({});
 
   const fetchStylists = async () => {
     setLoading(true);
     try {
       const res = await apiClient.get("/stylist");
+      console.log(res.data);
+
       setStylists(res.data.data || []);
       calculateStats(res.data.data || []);
     } catch (err) {
@@ -182,11 +185,18 @@ export default function Stylists() {
     }
   };
 
+  const handleImageError = (stylistId) => {
+  setImageErrors(prev => ({ ...prev, [stylistId]: true }));
+};
+
+
   const filteredStylists = stylists.filter(stylist =>
     stylist.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     stylist.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     stylist.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   return (
     <div className="p-6 bg-neutral-900 min-h-screen">
@@ -307,13 +317,10 @@ export default function Stylists() {
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-600 to-red-800 flex items-center justify-center mr-3 flex-shrink-0">
                         {stylist.image ? (
                           <img
-                            src={stylist.image}
+                            src={`${BASE_URL}/storage/${stylist.image}`}
                             alt={stylist.name}
                             className="w-10 h-10 rounded-full object-cover"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.parentNode.innerHTML = '<User className="w-5 h-5 text-white" />';
-                            }}
+                          onError={() => handleImageError(stylist.id)}
                           />
                         ) : (
                           <User className="w-5 h-5 text-white" />
