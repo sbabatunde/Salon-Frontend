@@ -34,7 +34,7 @@ import Blogs from './components/Admin/Blogs.jsx';
 import SignatureLooks from './components/Admin/SignatureLook.jsx';
 import HeroVideo from './components/Admin/HeroVideo.jsx';
 
-import Unauthorized from './pages/Unauthorized.jsx';
+import Unauthorized from './Pages/Unauthorized.jsx';
 import NotFound from './Pages/PageNotFound.jsx';
 
 // ProtectedRoute component
